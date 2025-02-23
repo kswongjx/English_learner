@@ -5,3 +5,9 @@ config.js
 .DS_Store
 node_modules/
 *.log 
+
+# Developer logs
+developer_log.txt
+
+# testing files
+test_gemini.html

@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Google AI API Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        textarea {
+            width: 100%;
+            height: 100px;
+            margin-bottom: 10px;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+        }
+        .output {
+            margin-top: 20px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            background-color: #f9f9f9;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Google AI API Test</h1>
+        <textarea id="inputText" placeholder="Enter your text here...">Explain how AI works</textarea>
+        <button onclick="callApi()">Generate Content</button>
+        <div id="outputText" class="output"></div>
+    </div>
+
+    <script src="config.js"></script>
+
+    <script>
+        async function callApi() {
+            const apiKey = CONFIG.GEMINI_API_KEY;  // Replace with your API key
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+            const inputText = document.getElementById('inputText').value;
+
+            const data = {
+                contents: [{
+                    parts: [{ text: inputText }]
+                }]
+            };
+
+            try {
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Error: ${response.statusText}`);
+                }
+
+                const result = await response.json();
+                console.log('API Response:', result);  // Log the response for debugging
+
+                if (result.candidates && result.candidates[0] && result.candidates[0].content && result.candidates[0].content.parts && result.candidates[0].content.parts[0]) {
+                    const outputText = result.candidates[0].content.parts[0].text;
+                    document.getElementById('outputText').textContent = outputText;
+                } else {
+                    throw new Error('Unexpected API response structure');
+                }
+            } catch (error) {
+                console.error('Error calling the API:', error);
+                document.getElementById('outputText').textContent = 'Error calling the API: ' + error.message;
+            }
+        }
+    </script>
+</body>
+</html>

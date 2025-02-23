@@ -103,4 +103,51 @@ function showTooltip(event, text) {
 function hideTooltip() {
     const tooltip = document.getElementById('tooltip');
     tooltip.style.display = 'none';
-} 
+}
+
+document.getElementById('translate').addEventListener('click', async function() {
+    const paragraphs = document.querySelectorAll('#passage p');
+    const loadingDiv = document.getElementById('loading');
+    const translationDiv = document.getElementById('translation');
+    
+    loadingDiv.style.display = 'block';
+    translationDiv.innerHTML = ''; // Clear previous translation
+    
+    try {
+        const passage = Array.from(paragraphs).map(p => p.innerText).join('\n\n');
+        const prompt = `將以下這段文字寫成中文，保持段落格式。只輸出該段中文，不要輸出其他東西：${passage}`;
+        
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${CONFIG.GEMINI_API_KEY}`;
+        
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                contents: [{
+                    parts: [{ text: prompt }]
+                }]
+            })
+        });
+
+        if (!response.ok) {
+            throw new Error(`Error: ${response.statusText}`);
+        }
+
+        const result = await response.json();
+        
+        if (result.candidates && result.candidates[0] && result.candidates[0].content && result.candidates[0].content.parts && result.candidates[0].content.parts[0]) {
+            const translation = result.candidates[0].content.parts[0].text;
+            const translatedParagraphs = translation.split('\n').filter(p => p.trim());
+            translationDiv.innerHTML = translatedParagraphs.map(para => `<p>${para}</p>`).join('');
+        } else {
+            throw new Error('Unexpected API response structure');
+        }
+    } catch (error) {
+        console.error('Translation error:', error);
+        translationDiv.innerHTML = '<p>Error during translation. Please try again later.</p>';
+    } finally {
+        loadingDiv.style.display = 'none';
+    }
+}); 

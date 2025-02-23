@@ -2,19 +2,18 @@ body {
     font-family: Arial, sans-serif;
     margin: 0;
     padding: 0;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
     background-color: #f4f4f9;
 }
 
 .container {
-    text-align: center;
-    background-color: #fff;
     padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.buttons {
+    text-align: center;
+    margin: 20px 0;
 }
 
 button {
@@ -22,6 +21,48 @@ button {
     padding: 10px 20px;
     font-size: 16px;
     cursor: pointer;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 4px;
+}
+
+button:hover {
+    background-color: #45a049;
+}
+
+.content-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 20px 0;
+    margin-top: 20px;
+}
+
+.content-table th {
+    padding: 15px;
+    text-align: left;
+    font-size: 24px;
+    color: #333;
+    border-bottom: 2px solid #4CAF50;
+}
+
+.content-table td {
+    background-color: #fff;
+    padding: 20px;
+    vertical-align: top;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.content-table p {
+    margin: 0;
+    padding: 20px 0;
+    line-height: 1.8;
+    border-bottom: 1px solid #eee;
+}
+
+.content-table p:last-child {
+    border-bottom: none;
 }
 
 .word {
@@ -32,4 +73,24 @@ button {
 .word:hover {
     background-color: #e0f7fa;
     color: #00796b;
+}
+
+#loading {
+    display: none;
+    text-align: center;
+    margin: 20px;
+    font-style: italic;
+    color: #666;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: rgba(255, 255, 255, 0.9);
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+#tooltip {
+    z-index: 1000;
 } 
