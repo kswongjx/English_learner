@@ -1,0 +1,7 @@
+# API Keys and Configurations
+config.js
+
+# Other common files to ignore
+.DS_Store
+node_modules/
+*.log 
