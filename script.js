@@ -67,28 +67,32 @@ document.getElementById('lookup-word').addEventListener('click', function() {
 
 document.querySelectorAll('.word').forEach(wordElement => {
     wordElement.addEventListener('mouseenter', function(event) {
-        const word = event.target.innerText.toLowerCase();
-        const dictionaryApiUrl = `https://api.dictionaryapi.dev/api/v2/entries/en/${word}`;
+        if (document.querySelector('input[name="dictionary"]:checked').value === 'english') {
+            const word = event.target.innerText.toLowerCase();
+            const dictionaryApiUrl = `https://api.dictionaryapi.dev/api/v2/entries/en/${word}`;
 
-        fetch(dictionaryApiUrl)
-            .then(response => response.json())
-            .then(data => {
-                if (data.title === "No Definitions Found") {
-                    showTooltip(event, "No definition found.");
-                    return;
-                }
+            fetch(dictionaryApiUrl)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.title === "No Definitions Found") {
+                        showTooltip(event, "No definition found.");
+                        return;
+                    }
 
-                const definition = data[0].meanings[0].definitions[0].definition;
-                showTooltip(event, definition);
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                showTooltip(event, "Error fetching definition.");
-            });
+                    const definition = data[0].meanings[0].definitions[0].definition;
+                    showTooltip(event, definition);
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showTooltip(event, "Error fetching definition.");
+                });
+        }
     });
 
     wordElement.addEventListener('mouseleave', function() {
-        hideTooltip();
+        if (document.querySelector('input[name="dictionary"]:checked').value === 'english') {
+            hideTooltip();
+        }
     });
 });
 
@@ -101,8 +105,10 @@ function showTooltip(event, text) {
 }
 
 function hideTooltip() {
-    const tooltip = document.getElementById('tooltip');
-    tooltip.style.display = 'none';
+    setTimeout(() => {
+        const tooltip = document.getElementById('tooltip');
+        tooltip.style.display = 'none';
+    }, 100);
 }
 
 document.getElementById('translate').addEventListener('click', async function() {
@@ -149,5 +155,111 @@ document.getElementById('translate').addEventListener('click', async function() 
         translationDiv.innerHTML = '<p>Error during translation. Please try again later.</p>';
     } finally {
         loadingDiv.style.display = 'none';
+    }
+});
+
+let selectedText = '';
+let currentParagraph = '';
+
+// Function to handle text selection
+function handleTextSelection() {
+    const selection = window.getSelection();
+    selectedText = selection.toString().trim();
+    
+    if (selectedText && document.querySelector('input[name="dictionary"]:checked').value === 'chinese') {
+        // Find the paragraph containing the selected text
+        const paragraphElement = selection.anchorNode.parentElement.closest('p');
+        if (paragraphElement) {
+            currentParagraph = paragraphElement.textContent;
+            showChineseLookupButton(selection);
+        }
+    }
+}
+
+// Function to show a small popup button for Chinese lookup
+function showChineseLookupButton(selection) {
+    let lookupButton = document.getElementById('chinese-lookup-button');
+    if (!lookupButton) {
+        lookupButton = document.createElement('button');
+        lookupButton.id = 'chinese-lookup-button';
+        lookupButton.textContent = 'Look up in Chinese';
+        lookupButton.style.position = 'absolute';
+        lookupButton.style.zIndex = '1000';
+        lookupButton.onclick = function(event) {
+            lookupChineseMeaning(event);
+        };
+        document.body.appendChild(lookupButton);
+    }
+
+    const range = selection.getRangeAt(0);
+    const rect = range.getBoundingClientRect();
+    lookupButton.style.left = `${rect.left}px`;
+    lookupButton.style.top = `${rect.bottom + window.scrollY + 5}px`;
+    lookupButton.style.display = 'block';
+}
+
+// Function to lookup Chinese meaning using Gemini AI
+async function lookupChineseMeaning(event) {
+    if (!selectedText || !currentParagraph) return;
+
+    const prompt = `${currentParagraph}這段文字中${selectedText}的中文意思是甚麼？`;
+    const loadingDiv = document.getElementById('loading');
+    const tooltip = document.getElementById('tooltip');
+    
+    try {
+        loadingDiv.style.display = 'block';
+        tooltip.style.display = 'none';
+        
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${CONFIG.GEMINI_API_KEY}`;
+        
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                contents: [{
+                    parts: [{ text: prompt }]
+                }]
+            })
+        });
+
+        if (!response.ok) {
+            throw new Error(`Error: ${response.statusText}`);
+        }
+
+        const result = await response.json();
+        if (result.candidates && result.candidates[0]?.content?.parts?.[0]) {
+            const meaning = result.candidates[0].content.parts[0].text;
+            const button = document.getElementById('chinese-lookup-button');
+            const rect = button.getBoundingClientRect();
+            showTooltip({
+                pageX: rect.left,
+                pageY: rect.top + window.scrollY
+            }, meaning);
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        showTooltip(event, "Error fetching meaning");
+    } finally {
+        loadingDiv.style.display = 'none';
+        document.getElementById('chinese-lookup-button')?.remove();
+    }
+}
+
+// Add event listener for text selection
+document.getElementById('passage').addEventListener('mouseup', handleTextSelection);
+
+// Add event listener to hide Chinese lookup button when clicking elsewhere
+document.addEventListener('mousedown', function(event) {
+    if (event.target.id !== 'chinese-lookup-button') {
+        document.getElementById('chinese-lookup-button')?.remove();
+    }
+});
+
+// Add this new event listener to hide tooltip when clicking outside
+document.addEventListener('click', function(event) {
+    if (!event.target.closest('#tooltip') && !event.target.closest('#chinese-lookup-button')) {
+        hideTooltip();
     }
 }); 

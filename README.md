@@ -1,12 +1,14 @@
 # English Learning Web Application
 
-A web-based application designed to help students learn English through interactive reading comprehension. The application provides features like text-to-speech, word definitions, and interactive word exploration with Chinese translation.
+A web-based application designed to help students learn English through interactive reading comprehension. The application provides features like text-to-speech, word definitions in both English and Chinese, and interactive word exploration with Chinese translation.
 
-## Current Features (v1.1.0)
+## Current Features (v1.2.0)
 
 - Interactive reading passage with 5 paragraphs
 - Text-to-speech functionality for the entire passage
-- Word definition lookup through dictionary API
+- Dual dictionary mode:
+  - English dictionary (hover to see definition)
+  - Chinese dictionary (select text to look up)
 - Hover functionality on words:
   - Visual highlighting effect
   - Definition tooltip display
@@ -28,7 +30,15 @@ A web-based application designed to help students learn English through interact
 
 ## Changelog
 
-### Version 1.1.0 (Latest)
+### Version 1.2.0 (Latest)
+- Added dual dictionary mode (English/Chinese)
+- Implemented text selection for Chinese word lookup
+- Added context-aware Chinese definitions using Gemini AI
+- Improved tooltip system for both dictionary modes
+- Enhanced UI for dictionary selection
+- Fixed tooltip positioning and display issues
+
+### Version 1.1.0
 - Added Chinese translation feature using Google Gemini AI
 - Implemented table layout for parallel text display
 - Enhanced styling for better readability
