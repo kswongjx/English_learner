@@ -1,30 +1,54 @@
-document.getElementById('play-audio').addEventListener('click', function() {
-    const passageText = document.getElementById('passage').innerText;
-    const apiUrl = "https://otts.api.zwei.de.eu.org/v1/audio/speech";
-    const apiKey = CONFIG.ZWEI_API_KEY;
+const API_BASE_URL = "https://high-boa-36.deno.dev"; // Replace with your Deno Deploy URL
 
-    fetch(apiUrl, {
-        method: 'POST',
-        headers: {
-            'Authorization': `Bearer ${apiKey}`,
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-            model: "en-US-AvaMultilingualNeural",
-            voice: "",
-            input: passageText
-        })
-    })
-    .then(response => response.blob())
-    .then(blob => {
+document.getElementById('play-audio').addEventListener('click', async function() {
+    const passageText = document.getElementById('passage').innerText;
+    const button = this;
+    
+    try {
+        button.disabled = true;
+        button.textContent = 'Loading...';
+        
+        const response = await fetch(`${API_BASE_URL}/zwei`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                model: "en-US-AvaMultilingualNeural",
+                voice: "",
+                input: passageText
+            })
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const blob = await response.blob();
         const audioUrl = URL.createObjectURL(blob);
         const audio = new Audio(audioUrl);
-        audio.play();
-    })
-    .catch(error => {
+        
+        audio.onended = () => {
+            URL.revokeObjectURL(audioUrl);
+            button.disabled = false;
+            button.textContent = 'Play Audio';
+        };
+
+        audio.onerror = () => {
+            URL.revokeObjectURL(audioUrl);
+            button.disabled = false;
+            button.textContent = 'Play Audio';
+            console.error('Audio playback error');
+        };
+
+        await audio.play();
+        
+    } catch (error) {
         console.error('Error:', error);
         alert('Failed to play audio. Please try again later.');
-    });
+        button.disabled = false;
+        button.textContent = 'Play Audio';
+    }
 });
 
 document.getElementById('lookup-word').addEventListener('click', function() {
@@ -65,37 +89,6 @@ document.getElementById('lookup-word').addEventListener('click', function() {
         });
 });
 
-document.querySelectorAll('.word').forEach(wordElement => {
-    wordElement.addEventListener('mouseenter', function(event) {
-        if (document.querySelector('input[name="dictionary"]:checked').value === 'english') {
-            const word = event.target.innerText.toLowerCase();
-            const dictionaryApiUrl = `https://api.dictionaryapi.dev/api/v2/entries/en/${word}`;
-
-            fetch(dictionaryApiUrl)
-                .then(response => response.json())
-                .then(data => {
-                    if (data.title === "No Definitions Found") {
-                        showTooltip(event, "No definition found.");
-                        return;
-                    }
-
-                    const definition = data[0].meanings[0].definitions[0].definition;
-                    showTooltip(event, definition);
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    showTooltip(event, "Error fetching definition.");
-                });
-        }
-    });
-
-    wordElement.addEventListener('mouseleave', function() {
-        if (document.querySelector('input[name="dictionary"]:checked').value === 'english') {
-            hideTooltip();
-        }
-    });
-});
-
 function showTooltip(event, text) {
     const tooltip = document.getElementById('tooltip');
     tooltip.innerText = text;
@@ -111,6 +104,43 @@ function hideTooltip() {
     }, 100);
 }
 
+function attachWordListeners() {
+    document.querySelectorAll('.word').forEach(wordElement => {
+        wordElement.addEventListener('mouseenter', async function(event) {
+            if (document.querySelector('input[name="dictionary"]:checked').value === 'english') {
+                const word = event.target.innerText.toLowerCase();
+                const dictionaryApiUrl = `https://api.dictionaryapi.dev/api/v2/entries/en/${word}`;
+
+                try {
+                    const response = await fetch(dictionaryApiUrl);
+                    const data = await response.json();
+
+                    if (data.title === "No Definitions Found") {
+                        showTooltip(event, "No definition found.");
+                        return;
+                    }
+
+                    const definition = data[0].meanings[0].definitions[0].definition;
+                    showTooltip(event, definition);
+                } catch (error) {
+                    console.error('Error:', error);
+                    showTooltip(event, "Error fetching definition.");
+                }
+            }
+        });
+
+        wordElement.addEventListener('mouseleave', function() {
+            if (document.querySelector('input[name="dictionary"]:checked').value === 'english') {
+                hideTooltip();
+            }
+        });
+    });
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    attachWordListeners();
+});
+
 document.getElementById('translate').addEventListener('click', async function() {
     const paragraphs = document.querySelectorAll('#passage p');
     const loadingDiv = document.getElementById('loading');
@@ -123,9 +153,7 @@ document.getElementById('translate').addEventListener('click', async function() 
         const passage = Array.from(paragraphs).map(p => p.innerText).join('\n\n');
         const prompt = `將以下這段文字寫成中文，保持段落格式。只輸出該段中文，不要輸出其他東西：${passage}`;
         
-        const url = `https://api-proxy.me/gemini/v1beta/models/gemini-2.0-flash:generateContent?key=${CONFIG.GEMINI_API_KEY}`;
-        
-        const response = await fetch(url, {
+        const response = await fetch(`${API_BASE_URL}/gemini`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -210,9 +238,7 @@ async function lookupChineseMeaning(event) {
         loadingDiv.style.display = 'block';
         tooltip.style.display = 'none';
         
-        const url = `https://api-proxy.me/gemini/v1beta/models/gemini-2.0-flash:generateContent?key=${CONFIG.GEMINI_API_KEY}`;
-        
-        const response = await fetch(url, {
+        const response = await fetch(`${API_BASE_URL}/gemini`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -292,4 +318,120 @@ window.handleWordLeave = function() {
     if (document.querySelector('input[name="dictionary"]:checked').value === 'english') {
         hideTooltip();
     }
-}; 
+};
+
+// Add image analysis related code
+const imageModal = document.getElementById('imageModal');
+const confirmModal = document.getElementById('confirmModal');
+const closeBtn = document.querySelector('.close');
+let ocrResult = '';
+
+document.getElementById('analyzeImage').onclick = function() {
+    imageModal.style.display = 'block';
+}
+
+closeBtn.onclick = function() {
+    imageModal.style.display = 'none';
+}
+
+window.onclick = function(event) {
+    if (event.target == imageModal) {
+        imageModal.style.display = 'none';
+    }
+    if (event.target == confirmModal) {
+        confirmModal.style.display = 'none';
+    }
+}
+
+document.getElementById('analyzeButton').onclick = async function() {
+    const fileInput = document.getElementById('imageFile');
+    const file = fileInput.files[0];
+    if (!file) {
+        alert('Please select an image file first');
+        return;
+    }
+    const mode = document.querySelector('input[name="mode"]:checked').value;
+    const prompt = mode === 'ocr' 
+        ? "请识别图片中的所有文字，并按段落格式整理输出。"
+        : "请详细描述这张图片的内容，包括主要对象、场景、动作和氛围等细节。";
+    const button = this;
+    const resultDiv = document.getElementById('analysisResult');
+    
+    button.disabled = true;
+    button.textContent = 'Analyzing...';
+    resultDiv.textContent = 'Processing image...';
+    try {
+        const dataUrl = await fileToDataUrl(file);
+        const response = await fetch(`${API_BASE_URL}/dashscope`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                "model": "qwen-vl-max-latest",
+                "input": {
+                    "messages": [
+                        {
+                            "role": "system",
+                            "content": [
+                                {"text": "You are a helpful assistant."}
+                            ]
+                        },
+                        {
+                            "role": "user",
+                            "content": [
+                                {
+                                    "image": dataUrl
+                                },
+                                {
+                                    "text": prompt
+                                }
+                            ]
+                        }
+                    ]
+                }
+            })
+        });
+        const data = await response.json();
+        const result = data.output.choices[0].message.content[0].text;
+        if (mode === 'ocr') {
+            ocrResult = result;
+            confirmModal.style.display = 'block';
+            imageModal.style.display = 'none';
+        } else {
+            resultDiv.textContent = result;
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        resultDiv.textContent = 'Error analyzing image: ' + error.message;
+    } finally {
+        button.disabled = false;
+        button.textContent = 'Analyze';
+    }
+}
+
+document.getElementById('confirmYes').onclick = function() {
+    const passageDiv = document.getElementById('passage');
+    const paragraphs = ocrResult.split('\n').filter(p => p.trim());
+    passageDiv.innerHTML = paragraphs.map(p => 
+        `<p>${p.split(' ').map(word => 
+            `<span class="word">${word}</span>`
+        ).join(' ')}</p>`
+    ).join('');
+    confirmModal.style.display = 'none';
+    attachWordListeners();
+}
+
+document.getElementById('confirmNo').onclick = function() {
+    confirmModal.style.display = 'none';
+    imageModal.style.display = 'block';
+}
+
+function fileToDataUrl(file) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = error => reject(error);
+    });
+} 
