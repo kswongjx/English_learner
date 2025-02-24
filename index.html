@@ -247,8 +247,8 @@
         }
         function attachWordListeners() {
             document.querySelectorAll('.word').forEach(wordElement => {
-                wordElement.addEventListener('mouseenter', handleWordHover);
-                wordElement.addEventListener('mouseleave', handleWordLeave);
+                wordElement.addEventListener('mouseenter', window.handleWordHover);
+                wordElement.addEventListener('mouseleave', window.handleWordLeave);
             });
         }
     </script>

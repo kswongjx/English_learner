@@ -123,7 +123,7 @@ document.getElementById('translate').addEventListener('click', async function() 
         const passage = Array.from(paragraphs).map(p => p.innerText).join('\n\n');
         const prompt = `將以下這段文字寫成中文，保持段落格式。只輸出該段中文，不要輸出其他東西：${passage}`;
         
-        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${CONFIG.GEMINI_API_KEY}`;
+        const url = `https://api-proxy.me/gemini/v1beta/models/gemini-2.0-flash:generateContent?key=${CONFIG.GEMINI_API_KEY}`;
         
         const response = await fetch(url, {
             method: 'POST',
@@ -210,7 +210,7 @@ async function lookupChineseMeaning(event) {
         loadingDiv.style.display = 'block';
         tooltip.style.display = 'none';
         
-        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${CONFIG.GEMINI_API_KEY}`;
+        const url = `https://api-proxy.me/gemini/v1beta/models/gemini-2.0-flash:generateContent?key=${CONFIG.GEMINI_API_KEY}`;
         
         const response = await fetch(url, {
             method: 'POST',
@@ -262,4 +262,34 @@ document.addEventListener('click', function(event) {
     if (!event.target.closest('#tooltip') && !event.target.closest('#chinese-lookup-button')) {
         hideTooltip();
     }
-}); 
+});
+
+// Add these lines at the end of script.js to make the functions globally accessible
+window.handleWordHover = async function(event) {
+    if (document.querySelector('input[name="dictionary"]:checked').value === 'english') {
+        const word = event.target.innerText.toLowerCase();
+        const dictionaryApiUrl = `https://api.dictionaryapi.dev/api/v2/entries/en/${word}`;
+
+        try {
+            const response = await fetch(dictionaryApiUrl);
+            const data = await response.json();
+
+            if (data.title === "No Definitions Found") {
+                showTooltip(event, "No definition found.");
+                return;
+            }
+
+            const definition = data[0].meanings[0].definitions[0].definition;
+            showTooltip(event, definition);
+        } catch (error) {
+            console.error('Error:', error);
+            showTooltip(event, "Error fetching definition.");
+        }
+    }
+};
+
+window.handleWordLeave = function() {
+    if (document.querySelector('input[name="dictionary"]:checked').value === 'english') {
+        hideTooltip();
+    }
+}; 

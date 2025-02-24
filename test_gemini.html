@@ -43,7 +43,7 @@
     <script>
         async function callApi() {
             const apiKey = CONFIG.GEMINI_API_KEY;  // Replace with your API key
-            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+            const url = `https://api-proxy.me/gemini/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
             const inputText = document.getElementById('inputText').value;
 
             const data = {

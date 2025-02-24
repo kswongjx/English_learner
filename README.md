@@ -2,7 +2,7 @@
 
 A web-based application designed to help students learn English through interactive reading comprehension. The application provides features like text-to-speech, word definitions in both English and Chinese, and interactive word exploration with Chinese translation.
 
-## Current Features (v1.3.0)
+## Current Features (v1.3.1)
 
 - Interactive reading passage with 5 paragraphs
 - Image Analysis functionality:
@@ -25,7 +25,7 @@ A web-based application designed to help students learn English through interact
 ### APIs Used
 - Text-to-Speech API: `https://otts.api.zwei.de.eu.org/v1/audio/speech`
 - Dictionary API: `https://api.dictionaryapi.dev/api/v2/entries/en`
-- Google Gemini AI API: `https://generativelanguage.googleapis.com/v1beta`
+- Google Gemini AI API (via proxy): `https://api-proxy.me/gemini/v1beta`
 - Qwen VL API: `https://dashscope.aliyuncs.com/api/v1/services/aigc/multimodal-generation/generation`
 
 ### Components
@@ -35,7 +35,14 @@ A web-based application designed to help students learn English through interact
 
 ## Changelog
 
-### Version 1.3.0 (Latest)
+### Version 1.3.1 (Latest)
+- Updated Gemini API endpoint to use proxy service
+- Fixed CORS issues with API requests
+- Improved Chinese translation reliability
+- Enhanced error handling for API calls
+- Fixed word hover functionality after OCR text replacement
+
+### Version 1.3.0
 - Added image analysis feature with dual functionality:
   - OCR for text extraction from images
   - Chinese description of image content
@@ -90,6 +97,7 @@ A web-based application designed to help students learn English through interact
 - Browser compatibility: Tested on modern browsers (Chrome, Firefox, Safari)
 - Image analysis supports common image formats (JPEG, PNG)
 - OCR works best with clear, well-lit images of text
+- Uses proxy service for Gemini API to avoid CORS issues
 
 ## Security
 - API keys are stored in a separate config file
