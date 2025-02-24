@@ -2,7 +2,7 @@
 
 A web-based application designed to help students learn English through interactive reading comprehension. The application provides features like text-to-speech, word definitions in both English and Chinese, and interactive word exploration with Chinese translation.
 
-## Current Features (v1.3.1)
+## Current Features (v2.0.0)
 
 - Interactive reading passage with 5 paragraphs
 - Image Analysis functionality:
@@ -22,6 +22,11 @@ A web-based application designed to help students learn English through interact
 
 ## Technical Details
 
+### Architecture
+- Frontend: Pure HTML/CSS/JavaScript
+- Backend: Deno Deploy for API proxying
+- APIs: Multiple third-party services for various functionalities
+
 ### APIs Used
 - Text-to-Speech API: `https://otts.api.zwei.de.eu.org/v1/audio/speech`
 - Dictionary API: `https://api.dictionaryapi.dev/api/v2/entries/en`
@@ -32,8 +37,20 @@ A web-based application designed to help students learn English through interact
 - HTML: Structure and content with table-based layout
 - CSS: Styling, animations, and responsive design
 - JavaScript: API integration and interactive features
+- Deno: API proxy server for secure key management
 
 ## Changelog
+
+### Version 2.0.0 (Latest)
+- Migrated to serverless architecture using Deno Deploy
+- Removed client-side API key requirements
+- Implemented secure API proxy for all third-party services
+- Fixed CORS issues with API requests
+- Improved error handling across all API calls
+- Enhanced audio playback reliability
+- Fixed word hover functionality after OCR text replacement
+- Improved Chinese translation reliability
+- Added proper binary data handling for audio responses
 
 ### Version 1.3.1 (Latest)
 - Updated Gemini API endpoint to use proxy service
@@ -71,6 +88,48 @@ A web-based application designed to help students learn English through interact
 ### Version 1.0.0 (Initial Release)
 - Basic features and layout implementation
 
+## Setup
+
+### Local Development
+1. Clone the repository
+2. Install Deno if developing locally
+3. Create `api_proxy.ts` for the Deno server
+4. Set up environment variables in Deno Deploy:
+   - GEMINI_API_KEY
+   - ZWEI_API_KEY
+   - DASHSCOPE_API_KEY
+
+### Production Deployment
+1. Deploy proxy server to Deno Deploy
+2. Update `API_BASE_URL` in script.js with your Deno Deploy URL
+3. Host the frontend files on any web server
+4. Access the application through the web server URL
+
+## Notes
+- No API keys needed in frontend code
+- All API requests are proxied through Deno Deploy
+- Browser compatibility: Tested on modern browsers (Chrome, Firefox, Safari)
+- Image analysis supports common image formats (JPEG, PNG)
+- OCR works best with clear, well-lit images of text
+- Uses proxy service for Gemini API to avoid CORS issues
+- Audio playback requires browser support for MP3 format
+
+## Security
+- All API keys securely stored in Deno Deploy environment
+- CORS headers properly configured
+- No sensitive data exposed to client
+- Request validation implemented in proxy server
+
+## Contributing
+1. Fork the repository
+2. Create a feature branch
+3. Commit your changes
+4. Push to the branch
+5. Create a Pull Request
+
+## License
+MIT License - see LICENSE file for details
+
 ## Planned Features
 - Multiple passages for different reading levels
 - User progress tracking
@@ -80,15 +139,6 @@ A web-based application designed to help students learn English through interact
 - Loading indicators for API requests
 - Offline functionality
 - User authentication system
-
-## Setup
-1. Clone the repository
-2. Copy `config.template.js` to `config.js`
-3. Add your API keys to `config.js`:
-   - GEMINI_API_KEY for Google Gemini AI
-   - ZWEI_API_KEY for text-to-speech
-   - DASHSCOPE_API_KEY for Qwen VL image analysis
-4. Open index.html in a web browser
 
 ## Notes
 - API keys are stored in config.js (not included in git repository)
