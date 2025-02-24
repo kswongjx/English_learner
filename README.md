@@ -2,9 +2,13 @@
 
 A web-based application designed to help students learn English through interactive reading comprehension. The application provides features like text-to-speech, word definitions in both English and Chinese, and interactive word exploration with Chinese translation.
 
-## Current Features (v1.2.0)
+## Current Features (v1.3.0)
 
 - Interactive reading passage with 5 paragraphs
+- Image Analysis functionality:
+  - OCR (Optical Character Recognition) for text extraction
+  - Image description in Chinese
+  - Option to replace current passage with OCR results
 - Text-to-speech functionality for the entire passage
 - Dual dictionary mode:
   - English dictionary (hover to see definition)
@@ -22,6 +26,7 @@ A web-based application designed to help students learn English through interact
 - Text-to-Speech API: `https://otts.api.zwei.de.eu.org/v1/audio/speech`
 - Dictionary API: `https://api.dictionaryapi.dev/api/v2/entries/en`
 - Google Gemini AI API: `https://generativelanguage.googleapis.com/v1beta`
+- Qwen VL API: `https://dashscope.aliyuncs.com/api/v1/services/aigc/multimodal-generation/generation`
 
 ### Components
 - HTML: Structure and content with table-based layout
@@ -30,7 +35,17 @@ A web-based application designed to help students learn English through interact
 
 ## Changelog
 
-### Version 1.2.0 (Latest)
+### Version 1.3.0 (Latest)
+- Added image analysis feature with dual functionality:
+  - OCR for text extraction from images
+  - Chinese description of image content
+- Implemented modal dialogs for image analysis workflow
+- Added confirmation dialog for passage replacement
+- Enhanced UI with new image analysis button
+- Improved error handling for image processing
+- Maintained word-level interactivity after OCR text replacement
+
+### Version 1.2.0
 - Added dual dictionary mode (English/Chinese)
 - Implemented text selection for Chinese word lookup
 - Added context-aware Chinese definitions using Gemini AI
@@ -47,14 +62,7 @@ A web-based application designed to help students learn English through interact
 - Updated API key management with config file
 
 ### Version 1.0.0 (Initial Release)
-- Added basic HTML structure with a 5-paragraph reading passage
-- Implemented text-to-speech functionality for the entire passage
-- Added word lookup feature with dictionary integration
-- Implemented hover effect on words with CSS transitions
-- Added tooltip functionality for word definitions on hover
-- Integrated dictionary API for word definitions and pronunciations
-- Added basic styling and layout
-- Implemented error handling for API requests
+- Basic features and layout implementation
 
 ## Planned Features
 - Multiple passages for different reading levels
@@ -72,6 +80,7 @@ A web-based application designed to help students learn English through interact
 3. Add your API keys to `config.js`:
    - GEMINI_API_KEY for Google Gemini AI
    - ZWEI_API_KEY for text-to-speech
+   - DASHSCOPE_API_KEY for Qwen VL image analysis
 4. Open index.html in a web browser
 
 ## Notes
@@ -79,6 +88,8 @@ A web-based application designed to help students learn English through interact
 - Make sure to keep your API keys secure and never commit them to version control
 - Consider rate limiting for API calls
 - Browser compatibility: Tested on modern browsers (Chrome, Firefox, Safari)
+- Image analysis supports common image formats (JPEG, PNG)
+- OCR works best with clear, well-lit images of text
 
 ## Security
 - API keys are stored in a separate config file

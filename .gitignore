@@ -10,4 +10,4 @@ node_modules/
 developer_log.txt
 
 # testing files
-test_gemini.html
+test_*.html
